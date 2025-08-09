@@ -58,10 +58,21 @@ router.get('/', authenticateToken, [
     // Get applications with pagination
     const applications = await getAll(
       `SELECT a.*, 
+              j.id as job_id,
               j.title as job_title, 
+              j.description as job_description,
               j.company as job_company,
-              u.name as applicant_name,
-              u.email as applicant_email
+              j.location as job_location,
+              j.salary_min as job_salary_min,
+              j.salary_max as job_salary_max,
+              j.type as job_type,
+              j.status as job_status,
+              j.created_at as job_created_at,
+              u.id as user_id,
+              u.name as user_name,
+              u.email as user_email,
+              u.role as user_role,
+              u.created_at as user_created_at
        FROM applications a
        LEFT JOIN jobs j ON a.job_id = j.id
        LEFT JOIN users u ON a.user_id = u.id
@@ -71,8 +82,37 @@ router.get('/', authenticateToken, [
       [...params, limit, offset]
     );
 
+    // Transform the data to include nested objects
+    const transformedApplications = applications.map(app => ({
+      id: app.id,
+      cover_letter: app.cover_letter,
+      cv_link: app.cv_link,
+      status: app.status,
+      created_at: app.created_at,
+      updated_at: app.updated_at,
+      job: {
+        id: app.job_id,
+        title: app.job_title,
+        description: app.job_description,
+        company: app.job_company,
+        location: app.job_location,
+        salary_min: app.job_salary_min,
+        salary_max: app.job_salary_max,
+        type: app.job_type,
+        status: app.job_status,
+        created_at: app.job_created_at
+      },
+      user: {
+        id: app.user_id,
+        name: app.user_name,
+        email: app.user_email,
+        role: app.user_role,
+        created_at: app.user_created_at
+      }
+    }));
+
     res.json({
-      applications,
+      applications: transformedApplications,
       pagination: {
         page: parseInt(page),
         limit: parseInt(limit),
@@ -94,11 +134,21 @@ router.get('/:id', authenticateToken, async (req, res) => {
 
     const application = await getRow(
       `SELECT a.*, 
+              j.id as job_id,
               j.title as job_title, 
-              j.company as job_company,
               j.description as job_description,
-              u.name as applicant_name,
-              u.email as applicant_email
+              j.company as job_company,
+              j.location as job_location,
+              j.salary_min as job_salary_min,
+              j.salary_max as job_salary_max,
+              j.type as job_type,
+              j.status as job_status,
+              j.created_at as job_created_at,
+              u.id as user_id,
+              u.name as user_name,
+              u.email as user_email,
+              u.role as user_role,
+              u.created_at as user_created_at
        FROM applications a
        LEFT JOIN jobs j ON a.job_id = j.id
        LEFT JOIN users u ON a.user_id = u.id
@@ -115,7 +165,36 @@ router.get('/:id', authenticateToken, async (req, res) => {
       return res.status(403).json({ error: 'Access denied' });
     }
 
-    res.json({ application });
+    // Transform the data to include nested objects
+    const transformedApplication = {
+      id: application.id,
+      cover_letter: application.cover_letter,
+      cv_link: application.cv_link,
+      status: application.status,
+      created_at: application.created_at,
+      updated_at: application.updated_at,
+      job: {
+        id: application.job_id,
+        title: application.job_title,
+        description: application.job_description,
+        company: application.job_company,
+        location: application.job_location,
+        salary_min: application.job_salary_min,
+        salary_max: application.job_salary_max,
+        type: application.job_type,
+        status: application.job_status,
+        created_at: application.job_created_at
+      },
+      user: {
+        id: application.user_id,
+        name: application.user_name,
+        email: application.user_email,
+        role: application.user_role,
+        created_at: application.user_created_at
+      }
+    };
+
+    res.json({ application: transformedApplication });
 
   } catch (error) {
     console.error('Get application error:', error);
@@ -124,7 +203,7 @@ router.get('/:id', authenticateToken, async (req, res) => {
 });
 
 // Submit application for a job
-router.post('/', authenticateToken, applicationValidation, async (req, res) => {
+router.post('/send', authenticateToken, applicationValidation, async (req, res) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -170,9 +249,21 @@ router.post('/', authenticateToken, applicationValidation, async (req, res) => {
 
     const newApplication = await getRow(
       `SELECT a.*, 
+              j.id as job_id,
               j.title as job_title, 
+              j.description as job_description,
               j.company as job_company,
-              u.name as applicant_name
+              j.location as job_location,
+              j.salary_min as job_salary_min,
+              j.salary_max as job_salary_max,
+              j.type as job_type,
+              j.status as job_status,
+              j.created_at as job_created_at,
+              u.id as user_id,
+              u.name as user_name,
+              u.email as user_email,
+              u.role as user_role,
+              u.created_at as user_created_at
        FROM applications a
        LEFT JOIN jobs j ON a.job_id = j.id
        LEFT JOIN users u ON a.user_id = u.id
@@ -180,9 +271,38 @@ router.post('/', authenticateToken, applicationValidation, async (req, res) => {
       [result.id]
     );
 
+    // Transform the data to include nested objects
+    const transformedApplication = {
+      id: newApplication.id,
+      cover_letter: newApplication.cover_letter,
+      cv_link: newApplication.cv_link,
+      status: newApplication.status,
+      created_at: newApplication.created_at,
+      updated_at: newApplication.updated_at,
+      job: {
+        id: newApplication.job_id,
+        title: newApplication.job_title,
+        description: newApplication.job_description,
+        company: newApplication.job_company,
+        location: newApplication.job_location,
+        salary_min: newApplication.job_salary_min,
+        salary_max: newApplication.job_salary_max,
+        type: newApplication.job_type,
+        status: newApplication.job_status,
+        created_at: newApplication.job_created_at
+      },
+      user: {
+        id: newApplication.user_id,
+        name: newApplication.user_name,
+        email: newApplication.user_email,
+        role: newApplication.user_role,
+        created_at: newApplication.user_created_at
+      }
+    };
+
     res.status(201).json({
       message: 'Application submitted successfully',
-      application: newApplication
+      application: transformedApplication
     });
 
   } catch (error) {
@@ -222,10 +342,21 @@ router.patch('/:id/status', authenticateToken, requireAdmin, [
 
     const updatedApplication = await getRow(
       `SELECT a.*, 
+              j.id as job_id,
               j.title as job_title, 
+              j.description as job_description,
               j.company as job_company,
-              u.name as applicant_name,
-              u.email as applicant_email
+              j.location as job_location,
+              j.salary_min as job_salary_min,
+              j.salary_max as job_salary_max,
+              j.type as job_type,
+              j.status as job_status,
+              j.created_at as job_created_at,
+              u.id as user_id,
+              u.name as user_name,
+              u.email as user_email,
+              u.role as user_role,
+              u.created_at as user_created_at
        FROM applications a
        LEFT JOIN jobs j ON a.job_id = j.id
        LEFT JOIN users u ON a.user_id = u.id
@@ -233,9 +364,38 @@ router.patch('/:id/status', authenticateToken, requireAdmin, [
       [id]
     );
 
+    // Transform the data to include nested objects
+    const transformedApplication = {
+      id: updatedApplication.id,
+      cover_letter: updatedApplication.cover_letter,
+      cv_link: updatedApplication.cv_link,
+      status: updatedApplication.status,
+      created_at: updatedApplication.created_at,
+      updated_at: updatedApplication.updated_at,
+      job: {
+        id: updatedApplication.job_id,
+        title: updatedApplication.job_title,
+        description: updatedApplication.job_description,
+        company: updatedApplication.job_company,
+        location: updatedApplication.job_location,
+        salary_min: updatedApplication.job_salary_min,
+        salary_max: updatedApplication.job_salary_max,
+        type: updatedApplication.job_type,
+        status: updatedApplication.job_status,
+        created_at: updatedApplication.job_created_at
+      },
+      user: {
+        id: updatedApplication.user_id,
+        name: updatedApplication.user_name,
+        email: updatedApplication.user_email,
+        role: updatedApplication.user_role,
+        created_at: updatedApplication.user_created_at
+      }
+    };
+
     res.json({
       message: 'Application status updated successfully',
-      application: updatedApplication
+      application: transformedApplication
     });
 
   } catch (error) {
@@ -287,18 +447,61 @@ router.get('/job/:jobId', authenticateToken, requireAdmin, async (req, res) => {
 
     const applications = await getAll(
       `SELECT a.*, 
-              u.name as applicant_name,
-              u.email as applicant_email
+              j.id as job_id,
+              j.title as job_title, 
+              j.description as job_description,
+              j.company as job_company,
+              j.location as job_location,
+              j.salary_min as job_salary_min,
+              j.salary_max as job_salary_max,
+              j.type as job_type,
+              j.status as job_status,
+              j.created_at as job_created_at,
+              u.id as user_id,
+              u.name as user_name,
+              u.email as user_email,
+              u.role as user_role,
+              u.created_at as user_created_at
        FROM applications a
+       LEFT JOIN jobs j ON a.job_id = j.id
        LEFT JOIN users u ON a.user_id = u.id
        WHERE a.job_id = ?
        ORDER BY a.created_at DESC`,
       [jobId]
     );
 
+    // Transform the data to include nested objects
+    const transformedApplications = applications.map(app => ({
+      id: app.id,
+      cover_letter: app.cover_letter,
+      cv_link: app.cv_link,
+      status: app.status,
+      created_at: app.created_at,
+      updated_at: app.updated_at,
+      job: {
+        id: app.job_id,
+        title: app.job_title,
+        description: app.job_description,
+        company: app.job_company,
+        location: app.job_location,
+        salary_min: app.job_salary_min,
+        salary_max: app.job_salary_max,
+        type: app.job_type,
+        status: app.job_status,
+        created_at: app.job_created_at
+      },
+      user: {
+        id: app.user_id,
+        name: app.user_name,
+        email: app.user_email,
+        role: app.user_role,
+        created_at: app.user_created_at
+      }
+    }));
+
     res.json({
       job,
-      applications
+      applications: transformedApplications
     });
 
   } catch (error) {

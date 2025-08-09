@@ -149,6 +149,22 @@ router.post('/', authenticateToken, requireAdmin, jobValidation, async (req, res
       status = 'active'
     } = req.body;
 
+    // Check if job with same title already exists
+    const existingJob = await getRow(
+      'SELECT id, title FROM jobs WHERE title = ? AND status != ?',
+      [title, 'closed']
+    );
+
+    if (existingJob) {
+      return res.status(400).json({ 
+        error: 'A job with this title already exists',
+        existingJob: {
+          id: existingJob.id,
+          title: existingJob.title
+        }
+      });
+    }
+
     // Validate salary range
     if (salary_min && salary_max && salary_min > salary_max) {
       return res.status(400).json({ error: 'Minimum salary cannot be greater than maximum salary' });
@@ -203,6 +219,24 @@ router.put('/:id', authenticateToken, requireAdmin, jobValidation, async (req, r
     const existingJob = await getRow('SELECT id FROM jobs WHERE id = ?', [id]);
     if (!existingJob) {
       return res.status(404).json({ error: 'Job not found' });
+    }
+
+    // Check if job with same title already exists (excluding current job)
+    if (title) {
+      const duplicateJob = await getRow(
+        'SELECT id, title FROM jobs WHERE title = ? AND id != ? AND status != ?',
+        [title, id, 'closed']
+      );
+
+      if (duplicateJob) {
+        return res.status(400).json({ 
+          error: 'A job with this title already exists',
+          existingJob: {
+            id: duplicateJob.id,
+            title: duplicateJob.title
+          }
+        });
+      }
     }
 
     // Validate salary range
