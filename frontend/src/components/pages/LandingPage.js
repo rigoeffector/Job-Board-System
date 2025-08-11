@@ -25,13 +25,13 @@ const LandingPage = () => {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link 
                   to="/register" 
-                  className="btn btn-primary btn-lg"
+                  className="btn btn-primary btn-lg btn-hover-effect"
                 >
                   Get Started
                 </Link>
                 <Link 
                   to="/jobs" 
-                  className="btn btn-outline btn-lg"
+                  className="btn btn-outline btn-lg btn-hover-effect"
                 >
                   Browse Jobs
                 </Link>
@@ -40,13 +40,13 @@ const LandingPage = () => {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link 
                   to="/dashboard" 
-                  className="btn btn-primary btn-lg"
+                  className="btn btn-primary btn-lg btn-hover-effect"
                 >
                   Go to Dashboard
                 </Link>
                 <Link 
                   to="/jobs" 
-                  className="btn btn-outline btn-lg"
+                  className="btn btn-outline btn-lg btn-hover-effect"
                 >
                   Browse Jobs
                 </Link>
@@ -69,9 +69,9 @@ const LandingPage = () => {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            <div className="text-center p-6">
-              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">🔍</span>
+            <div className="text-center p-6 card-enhanced group">
+              <div className="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-primary-200 transition-colors duration-300">
+                <span className="text-2xl icon-hover">🔍</span>
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">Easy Search</h3>
               <p className="text-gray-600">
@@ -79,9 +79,9 @@ const LandingPage = () => {
               </p>
             </div>
 
-            <div className="text-center p-6">
-              <div className="w-16 h-16 bg-secondary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">📱</span>
+            <div className="text-center p-6 card-enhanced group">
+              <div className="w-16 h-16 bg-secondary-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-secondary-200 transition-colors duration-300">
+                <span className="text-2xl icon-hover">📱</span>
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">Mobile Friendly</h3>
               <p className="text-gray-600">
@@ -89,9 +89,9 @@ const LandingPage = () => {
               </p>
             </div>
 
-            <div className="text-center p-6">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">⚡</span>
+            <div className="text-center p-6 card-enhanced group">
+              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:bg-green-200 transition-colors duration-300">
+                <span className="text-2xl icon-hover">⚡</span>
               </div>
               <h3 className="text-xl font-semibold text-gray-900 mb-2">Quick Apply</h3>
               <p className="text-gray-600">
@@ -116,13 +116,13 @@ const LandingPage = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link 
                 to="/register" 
-                className="btn bg-white text-primary-600 hover:bg-gray-100 btn-lg"
+                className="btn bg-white text-primary-600 hover:bg-gray-100 btn-lg btn-hover-effect"
               >
                 Create Account
               </Link>
               <Link 
                 to="/jobs" 
-                className="btn border-2 border-white text-white hover:bg-white hover:text-primary-600 btn-lg"
+                className="btn border-2 border-white text-white hover:bg-white hover:text-primary-600 btn-lg btn-hover-effect"
               >
                 Browse Jobs
               </Link>
@@ -131,13 +131,13 @@ const LandingPage = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link 
                 to="/dashboard" 
-                className="btn bg-white text-primary-600 hover:bg-gray-100 btn-lg"
+                className="btn bg-white text-primary-600 hover:bg-gray-100 btn-lg btn-hover-effect"
               >
                 Go to Dashboard
               </Link>
               <Link 
                 to="/jobs" 
-                className="btn border-2 border-white text-white hover:bg-white hover:text-primary-600 btn-lg"
+                className="btn border-2 border-white text-white hover:bg-white hover:text-primary-600 btn-lg btn-hover-effect"
               >
                 Browse Jobs
               </Link>

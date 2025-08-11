@@ -29,7 +29,7 @@ const Header = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
+          <Link to="/" className="flex items-center space-x-2 hover-scale">
             <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-lg">I</span>
             </div>
@@ -40,7 +40,7 @@ const Header = () => {
           <nav className="hidden md:flex items-center space-x-8">
             <Link 
               to="/jobs" 
-              className="text-gray-600 hover:text-primary-600 font-medium transition-colors"
+              className="nav-link"
             >
               Jobs
             </Link>
@@ -49,14 +49,14 @@ const Header = () => {
               <>
                 <Link 
                   to="/applications" 
-                  className="text-gray-600 hover:text-primary-600 font-medium transition-colors"
+                  className="nav-link"
                 >
                   Applications
                 </Link>
                 {user?.role === 'admin' && (
                   <Link 
                     to="/admin" 
-                    className="text-gray-600 hover:text-primary-600 font-medium transition-colors"
+                    className="nav-link"
                   >
                     Admin
                   </Link>
@@ -71,7 +71,7 @@ const Header = () => {
               <>
                 <Link 
                   to="/login" 
-                  className="text-gray-600 hover:text-primary-600 font-medium transition-colors"
+                  className="nav-link"
                 >
                   Sign In
                 </Link>
@@ -86,16 +86,16 @@ const Header = () => {
               <div className="relative">
                 <button
                   onClick={toggleDropdown}
-                  className="flex items-center space-x-2 text-gray-700 hover:text-primary-600 transition-colors"
+                  className="flex items-center space-x-2 text-gray-700 hover:text-primary-600 transition-colors interactive"
                 >
-                  <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
+                  <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center hover-scale">
                     <span className="text-primary-600 font-medium">
                       {user?.name?.charAt(0)?.toUpperCase() || 'U'}
                     </span>
                   </div>
                   <span className="font-medium">{user?.name}</span>
                   <svg 
-                    className={`w-4 h-4 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} 
+                    className={`w-4 h-4 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} 
                     fill="none" 
                     stroke="currentColor" 
                     viewBox="0 0 24 24"
@@ -106,17 +106,17 @@ const Header = () => {
 
                 {/* Dropdown Menu */}
                 {isDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50 animate-fade-in">
                     <Link 
                       to="/dashboard" 
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors interactive"
                       onClick={() => setIsDropdownOpen(false)}
                     >
                       Dashboard
                     </Link>
                     <Link 
                       to="/profile" 
-                      className="block px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors interactive"
                       onClick={() => setIsDropdownOpen(false)}
                     >
                       Profile
@@ -124,7 +124,7 @@ const Header = () => {
                     <hr className="my-2" />
                     <button
                       onClick={handleLogout}
-                      className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors"
+                      className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-50 transition-colors interactive"
                     >
                       Sign Out
                     </button>
@@ -137,7 +137,7 @@ const Header = () => {
           {/* Mobile menu button */}
           <button
             onClick={toggleMenu}
-            className="md:hidden p-2 rounded-md text-gray-600 hover:text-primary-600 hover:bg-gray-100 transition-colors"
+            className="md:hidden p-2 rounded-md text-gray-600 hover:text-primary-600 hover:bg-gray-100 transition-colors interactive"
           >
             <svg 
               className="w-6 h-6" 
@@ -156,11 +156,11 @@ const Header = () => {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden border-t border-gray-200 py-4">
+          <div className="md:hidden border-t border-gray-200 py-4 animate-slide-down">
             <nav className="flex flex-col space-y-4">
               <Link 
                 to="/jobs" 
-                className="text-gray-600 hover:text-primary-600 font-medium transition-colors"
+                className="nav-link"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Jobs
@@ -170,21 +170,21 @@ const Header = () => {
                 <>
                   <Link 
                     to="/applications" 
-                    className="text-gray-600 hover:text-primary-600 font-medium transition-colors"
+                    className="nav-link"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Applications
                   </Link>
                   <Link 
                     to="/dashboard" 
-                    className="text-gray-600 hover:text-primary-600 font-medium transition-colors"
+                    className="nav-link"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Dashboard
                   </Link>
                   <Link 
                     to="/profile" 
-                    className="text-gray-600 hover:text-primary-600 font-medium transition-colors"
+                    className="nav-link"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Profile
@@ -192,7 +192,7 @@ const Header = () => {
                   {user?.role === 'admin' && (
                     <Link 
                       to="/admin" 
-                      className="text-gray-600 hover:text-primary-600 font-medium transition-colors"
+                      className="nav-link"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       Admin
@@ -200,7 +200,7 @@ const Header = () => {
                   )}
                   <button
                     onClick={handleLogout}
-                    className="text-left text-gray-600 hover:text-primary-600 font-medium transition-colors"
+                    className="text-left nav-link"
                   >
                     Sign Out
                   </button>
@@ -211,7 +211,7 @@ const Header = () => {
                 <div className="flex flex-col space-y-2 pt-4 border-t border-gray-200">
                   <Link 
                     to="/login" 
-                    className="text-gray-600 hover:text-primary-600 font-medium transition-colors"
+                    className="nav-link"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Sign In

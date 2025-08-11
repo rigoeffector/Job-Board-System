@@ -26,13 +26,20 @@ function App() {
   const dispatch = useDispatch();
   const { token, loading } = useSelector((state) => state.auth);
 
+  console.log('App component rendered', { token, loading });
+
   useEffect(() => {
+    console.log('App useEffect triggered', { token });
     if (token) {
+      console.log('Dispatching getProfileRequest');
       dispatch(getProfileRequest());
     }
   }, [dispatch, token]);
 
+  console.log('App render state:', { loading });
+
   if (loading) {
+    console.log('Showing loading screen');
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
@@ -43,6 +50,7 @@ function App() {
     );
   }
 
+  console.log('Rendering main app content');
   return (
     <Router>
       <div className="min-h-screen flex flex-col bg-gray-50">
