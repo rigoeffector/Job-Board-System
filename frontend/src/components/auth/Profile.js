@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getProfileRequest, updateProfileRequest } from '../../store/actions';
+import { useNotification } from '../../contexts/NotificationContext';
 
 const Profile = () => {
   const dispatch = useDispatch();
   const { user, loading, error } = useSelector((state) => state.auth);
+  const { showError, showSuccess } = useNotification();
   
   const [formData, setFormData] = useState({
     name: '',
@@ -16,6 +18,13 @@ const Profile = () => {
   useEffect(() => {
     dispatch(getProfileRequest());
   }, [dispatch]);
+
+  // Show error notification when error changes
+  useEffect(() => {
+    if (error) {
+      showError(error);
+    }
+  }, [error, showError]);
 
   useEffect(() => {
     if (user) {
@@ -63,6 +72,7 @@ const Profile = () => {
     if (validateForm()) {
       dispatch(updateProfileRequest(formData));
       setIsEditing(false);
+      showSuccess('Profile updated successfully!');
     }
   };
 

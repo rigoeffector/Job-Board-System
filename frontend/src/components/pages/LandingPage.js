@@ -1,9 +1,24 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchJobsRequest } from '../../store/actions';
+import JobCard from '../jobs/JobCard';
 
 const LandingPage = () => {
+  const dispatch = useDispatch();
   const { isAuthenticated } = useSelector((state) => state.auth);
+  const { jobs, loading: jobsLoading } = useSelector((state) => state.jobs);
+
+  // Fetch recent jobs on component mount
+  useEffect(() => {
+    dispatch(fetchJobsRequest({ limit: 3, status: 'active' }));
+  }, [dispatch]);
+
+  // Get the 3 most recent active jobs
+  const recentJobs = jobs
+    .filter(job => job.status === 'active')
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    .slice(0, 3);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 via-white to-secondary-50">
@@ -98,6 +113,50 @@ const LandingPage = () => {
                 Submit your application with just a few clicks and track your application status.
               </p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Recent Job Opportunities Section */}
+      <section className="py-20 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Recent Job Opportunities
+            </h2>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+              Discover the latest job openings from top companies
+            </p>
+          </div>
+
+          {jobsLoading ? (
+            <div className="flex justify-center items-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+              <span className="ml-3 text-gray-600">Loading recent jobs...</span>
+            </div>
+          ) : recentJobs.length > 0 ? (
+            <div className="grid md:grid-cols-3 gap-6 mb-8">
+              {recentJobs.map((job) => (
+                <JobCard key={job.id} job={job} />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">💼</span>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No Recent Jobs</h3>
+              <p className="text-gray-600 mb-6">Check back soon for new opportunities!</p>
+            </div>
+          )}
+
+          <div className="text-center">
+            <Link 
+              to="/jobs" 
+              className="btn btn-primary btn-lg btn-hover-effect"
+            >
+              View All Jobs
+            </Link>
           </div>
         </div>
       </section>

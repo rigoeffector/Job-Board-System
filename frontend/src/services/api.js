@@ -28,10 +28,19 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    console.log('API Error:', error.response?.status, error.response?.data);
+    
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
-      window.location.href = '/login';
+      // Don't redirect if we're already on login page to prevent infinite loop
+      if (window.location.pathname !== '/login') {
+        window.location.href = '/login';
+      }
+    } else if (error.response?.status === 429) {
+      // Rate limit error - don't redirect, let the component handle it
+      console.log('Rate limit exceeded');
     }
+    
     return Promise.reject(error);
   }
 );
@@ -57,7 +66,7 @@ export const jobsAPI = {
 export const applicationsAPI = {
   getApplications: (params) => api.get('/applications', { params }),
   getApplication: (id) => api.get(`/applications/${id}`),
-  submitApplication: (applicationData) => api.post('/applications/send', applicationData),
+  submitApplication: (applicationData) => api.post('/applications', applicationData),
   updateApplicationStatus: (id, status) => api.patch(`/applications/${id}/status`, { status }),
   deleteApplication: (id) => api.delete(`/applications/${id}`),
   getJobApplications: (jobId) => api.get(`/applications/job/${jobId}`),

@@ -10,30 +10,32 @@ const JobList = () => {
   const { jobs, loading, pagination, filters } = useSelector((state) => state.jobs);
 
   useEffect(() => {
-    dispatch(fetchJobsRequest());
-  }, [dispatch, pagination.currentPage, filters]);
+    // Send filters and pagination to the backend API
+    const apiParams = {
+      page: pagination.page,
+      limit: pagination.limit,
+      ...filters
+    };
+    
+    // Map frontend filter names to backend API parameters
+    if (apiParams.search) {
+      apiParams.title = apiParams.search;
+      delete apiParams.search;
+    }
+    
+    // Remove empty filter values
+    Object.keys(apiParams).forEach(key => {
+      if (apiParams[key] === '' || apiParams[key] === null || apiParams[key] === undefined) {
+        delete apiParams[key];
+      }
+    });
+    
+    dispatch(fetchJobsRequest(apiParams));
+  }, [dispatch, pagination.page, pagination.limit, filters]);
 
   const handlePageChange = (page) => {
     dispatch(setPage(page));
   };
-
-  const filteredJobs = jobs.filter(job => {
-    const matchesSearch = !filters.search || 
-      job.title?.toLowerCase().includes(filters.search.toLowerCase()) ||
-      job.company?.toLowerCase().includes(filters.search.toLowerCase()) ||
-      job.description?.toLowerCase().includes(filters.search.toLowerCase());
-    
-    const matchesLocation = !filters.location || 
-      job.location?.toLowerCase().includes(filters.location.toLowerCase());
-    
-    const matchesType = !filters.type || job.type === filters.type;
-    const matchesStatus = !filters.status || job.status === filters.status;
-    
-    const matchesSalary = (!filters.salary_min || job.salary_min >= filters.salary_min) &&
-                         (!filters.salary_max || job.salary_max <= filters.salary_max);
-    
-    return matchesSearch && matchesLocation && matchesType && matchesStatus && matchesSalary;
-  });
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -63,11 +65,16 @@ const JobList = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900">
-                    {filteredJobs.length} {filteredJobs.length === 1 ? 'Job' : 'Jobs'} Found
+                    {pagination.total} {pagination.total === 1 ? 'Job' : 'Jobs'} Found
                   </h2>
                   {filters.search && (
                     <p className="text-sm text-gray-600 mt-1">
                       Showing results for "{filters.search}"
+                    </p>
+                  )}
+                  {pagination.pages > 1 && (
+                    <p className="text-sm text-gray-600 mt-1">
+                      Page {pagination.page} of {pagination.pages}
                     </p>
                   )}
                 </div>
@@ -96,20 +103,20 @@ const JobList = () => {
                   </div>
                 ))}
               </div>
-            ) : filteredJobs.length > 0 ? (
+            ) : jobs.length > 0 ? (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-                  {filteredJobs.map((job) => (
+                  {jobs.map((job) => (
                     <JobCard key={job.id} job={job} />
                   ))}
                 </div>
 
                 {/* Pagination */}
-                {pagination.totalPages > 1 && (
+                {pagination.pages > 1 && (
                   <div className="flex justify-center">
                     <Pagination
-                      currentPage={pagination.currentPage}
-                      totalPages={pagination.totalPages}
+                      currentPage={pagination.page}
+                      totalPages={pagination.pages}
                       onPageChange={handlePageChange}
                     />
                   </div>
@@ -121,15 +128,15 @@ const JobList = () => {
                   <span className="text-4xl">🔍</span>
                 </div>
                 <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  {filters.search || Object.values(filters).some(v => v) ? 'No jobs found' : 'No jobs available'}
+                  {Object.values(filters).some(v => v && v !== '') ? 'No jobs found' : 'No jobs available'}
                 </h3>
                 <p className="text-gray-600 mb-6">
-                  {filters.search || Object.values(filters).some(v => v)
+                  {Object.values(filters).some(v => v && v !== '')
                     ? 'Try adjusting your search criteria or filters to find more jobs.'
                     : 'Check back later for new job opportunities.'
                   }
                 </p>
-                {(filters.search || Object.values(filters).some(v => v)) && (
+                {Object.values(filters).some(v => v && v !== '') && (
                   <button
                     onClick={() => dispatch(clearFilters())}
                     className="btn btn-primary"

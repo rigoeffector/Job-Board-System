@@ -3,7 +3,7 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialState = {
   user: null,
   token: localStorage.getItem('token'),
-  isAuthenticated: false,
+  isAuthenticated: !!localStorage.getItem('token'),
   loading: false,
   error: null,
 };
@@ -13,17 +13,21 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     loginStart: (state) => {
+      console.log('Auth slice: loginStart action dispatched');
       state.loading = true;
       state.error = null;
     },
     loginSuccess: (state, action) => {
+      console.log('Auth slice: loginSuccess action dispatched with payload:', action.payload);
       state.loading = false;
       state.isAuthenticated = true;
       state.user = action.payload.user;
       state.token = action.payload.token;
       localStorage.setItem('token', action.payload.token);
+      console.log('Auth slice: State updated, isAuthenticated:', state.isAuthenticated);
     },
     loginFailure: (state, action) => {
+      console.log('Auth slice: loginFailure action dispatched with error:', action.payload);
       state.loading = false;
       state.error = action.payload;
     },
@@ -54,6 +58,17 @@ const authSlice = createSlice({
     updateProfile: (state, action) => {
       state.user = { ...state.user, ...action.payload };
     },
+    setAuthenticated: (state, action) => {
+      state.isAuthenticated = true;
+      state.user = action.payload.user;
+      state.token = action.payload.token;
+    },
+    setUnauthenticated: (state) => {
+      state.isAuthenticated = false;
+      state.user = null;
+      state.token = null;
+      localStorage.removeItem('token');
+    },
   },
 });
 
@@ -67,6 +82,8 @@ export const {
   logout,
   clearError,
   updateProfile,
+  setAuthenticated,
+  setUnauthenticated,
 } = authSlice.actions;
 
 export default authSlice.reducer; 

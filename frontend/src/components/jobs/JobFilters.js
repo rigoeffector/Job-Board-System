@@ -1,17 +1,70 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { setFilters, clearFilters } from '../../store/actions';
+import { setFilters, clearFilters, fetchJobsRequest } from '../../store/actions';
+import useDebounce from '../../hooks/useDebounce';
 
 const JobFilters = () => {
   const dispatch = useDispatch();
-  const { filters } = useSelector((state) => state.jobs);
+  const { filters, pagination } = useSelector((state) => state.jobs);
+  const [searchValue, setSearchValue] = useState(filters.search || '');
+  const [locationValue, setLocationValue] = useState(filters.location || '');
+
+  // Debounce the input values
+  const debouncedSearch = useDebounce(searchValue, 500);
+  const debouncedLocation = useDebounce(locationValue, 500);
+
+  // Update filters when debounced values change
+  useEffect(() => {
+    if (debouncedSearch !== filters.search) {
+      handleFilterChange('search', debouncedSearch);
+    }
+  }, [debouncedSearch]);
+
+  useEffect(() => {
+    if (debouncedLocation !== filters.location) {
+      handleFilterChange('location', debouncedLocation);
+    }
+  }, [debouncedLocation]);
 
   const handleFilterChange = (name, value) => {
-    dispatch(setFilters({ ...filters, [name]: value }));
+    const newFilters = { ...filters, [name]: value };
+    dispatch(setFilters(newFilters));
+    
+    // Send API request with updated filters
+    const apiParams = {
+      page: 1, // Reset to first page when filters change
+      limit: pagination.limit,
+      ...newFilters
+    };
+    
+    // Map frontend filter names to backend API parameters
+    if (apiParams.search) {
+      apiParams.title = apiParams.search;
+      delete apiParams.search;
+    }
+    
+    // Remove empty filter values
+    Object.keys(apiParams).forEach(key => {
+      if (apiParams[key] === '' || apiParams[key] === null || apiParams[key] === undefined) {
+        delete apiParams[key];
+      }
+    });
+    
+    dispatch(fetchJobsRequest(apiParams));
   };
 
   const handleClearFilters = () => {
     dispatch(clearFilters());
+    setSearchValue('');
+    setLocationValue('');
+    
+    // Send API request without filters
+    const apiParams = {
+      page: 1,
+      limit: pagination.limit
+    };
+    
+    dispatch(fetchJobsRequest(apiParams));
   };
 
   return (
@@ -35,8 +88,8 @@ const JobFilters = () => {
           <input
             type="text"
             placeholder="Job title, company, or keywords..."
-            value={filters.search || ''}
-            onChange={(e) => handleFilterChange('search', e.target.value)}
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           />
         </div>
@@ -49,8 +102,8 @@ const JobFilters = () => {
           <input
             type="text"
             placeholder="City, state, or remote..."
-            value={filters.location || ''}
-            onChange={(e) => handleFilterChange('location', e.target.value)}
+            value={locationValue}
+            onChange={(e) => setLocationValue(e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
           />
         </div>
@@ -158,7 +211,10 @@ const JobFilters = () => {
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-800">
                 Search: {filters.search}
                 <button
-                  onClick={() => handleFilterChange('search', '')}
+                  onClick={() => {
+                    setSearchValue('');
+                    handleFilterChange('search', '');
+                  }}
                   className="ml-1 text-primary-600 hover:text-primary-800"
                 >
                   ×
@@ -169,7 +225,10 @@ const JobFilters = () => {
               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                 Location: {filters.location}
                 <button
-                  onClick={() => handleFilterChange('location', '')}
+                  onClick={() => {
+                    setLocationValue('');
+                    handleFilterChange('location', '');
+                  }}
                   className="ml-1 text-blue-600 hover:text-blue-800"
                 >
                   ×
@@ -193,6 +252,20 @@ const JobFilters = () => {
                 <button
                   onClick={() => handleFilterChange('status', '')}
                   className="ml-1 text-yellow-600 hover:text-yellow-800"
+                >
+                  ×
+                </button>
+              </span>
+            )}
+            {(filters.salary_min || filters.salary_max) && (
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                Salary: {filters.salary_min || '0'} - {filters.salary_max || '∞'}
+                <button
+                  onClick={() => {
+                    handleFilterChange('salary_min', '');
+                    handleFilterChange('salary_max', '');
+                  }}
+                  className="ml-1 text-purple-600 hover:text-purple-800"
                 >
                   ×
                 </button>

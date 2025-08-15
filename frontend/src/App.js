@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { getProfileRequest } from './store/actions';
+import { NotificationProvider } from './contexts/NotificationContext';
 
 // Layout Components
 import Header from './components/layout/Header';
@@ -24,17 +25,17 @@ import Profile from './components/auth/Profile';
 
 function App() {
   const dispatch = useDispatch();
-  const { token, loading } = useSelector((state) => state.auth);
+  const { token, loading, isAuthenticated } = useSelector((state) => state.auth);
 
-  console.log('App component rendered', { token, loading });
+  console.log('App component rendered', { token, loading, isAuthenticated });
 
   useEffect(() => {
     console.log('App useEffect triggered', { token });
-    if (token) {
+    if (token && !isAuthenticated) {
       console.log('Dispatching getProfileRequest');
       dispatch(getProfileRequest());
     }
-  }, [dispatch, token]);
+  }, [dispatch, token, isAuthenticated]);
 
   console.log('App render state:', { loading });
 
@@ -52,8 +53,9 @@ function App() {
 
   console.log('Rendering main app content');
   return (
-    <Router>
-      <div className="min-h-screen flex flex-col bg-gray-50">
+    <NotificationProvider>
+      <Router>
+        <div className="min-h-screen flex flex-col bg-gray-50">
         <Header />
         <main className="flex-1">
           <Routes>
@@ -128,7 +130,8 @@ function App() {
         </main>
         <Footer />
       </div>
-    </Router>
+      </Router>
+    </NotificationProvider>
   );
 }
 

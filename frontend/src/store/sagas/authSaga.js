@@ -16,16 +16,40 @@ import {
   registerFailure,
   logout,
   updateProfile,
+  setAuthenticated,
+  setUnauthenticated,
 } from '../reducers/authSlice';
 
 // Login saga
 function* loginSaga(action) {
   try {
+    console.log('Login saga started with payload:', action.payload);
     yield put(loginStart());
+    
+    console.log('Making API call to login endpoint...');
     const response = yield call(authAPI.login, action.payload);
+    console.log('Login API response:', response.data);
+    
     yield put(loginSuccess(response.data));
+    console.log('Login success action dispatched');
   } catch (error) {
-    const errorMessage = error.response?.data?.error || 'Login failed';
+    console.error('Login saga error:', error);
+    console.error('Error details:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message
+    });
+    
+    let errorMessage = 'Login failed. Please try again.';
+    
+    if (error.response?.status === 401) {
+      errorMessage = error.response?.data?.error || 'Invalid email or password';
+    } else if (error.response?.status === 429) {
+      errorMessage = error.response?.data?.error || 'Too many login attempts. Please wait a few minutes and try again.';
+    } else if (error.response?.data?.error) {
+      errorMessage = error.response.data.error;
+    }
+    
     yield put(loginFailure(errorMessage));
   }
 }
@@ -55,12 +79,13 @@ function* logoutSaga() {
 function* getProfileSaga() {
   try {
     const response = yield call(authAPI.getProfile);
-    yield put(loginSuccess({ user: response.data.user, token: localStorage.getItem('token') }));
+    const token = localStorage.getItem('token');
+    yield put(setAuthenticated({ user: response.data.user, token }));
   } catch (error) {
     console.error('Get profile error:', error);
     // If token is invalid, logout
     if (error.response?.status === 401) {
-      yield put(logout());
+      yield put(setUnauthenticated());
     }
   }
 }

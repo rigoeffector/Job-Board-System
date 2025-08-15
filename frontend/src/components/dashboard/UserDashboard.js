@@ -2,12 +2,15 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchJobsRequest, fetchApplicationsRequest } from '../../store/actions';
+import JobApplicationModal from '../jobs/JobApplicationModal';
 
 const UserDashboard = () => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   const { jobs, loading: jobsLoading } = useSelector((state) => state.jobs);
   const { applications, loading: appsLoading } = useSelector((state) => state.applications);
+  const [selectedJob, setSelectedJob] = useState(null);
+  const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
   const [stats, setStats] = useState({
     totalApplications: 0,
     pendingApplications: 0,
@@ -32,7 +35,11 @@ const UserDashboard = () => {
     }
   }, [applications]);
 
-  const recentJobs = jobs.slice(0, 3);
+  // Get the 3 most recent active jobs
+  const recentJobs = jobs
+    .filter(job => job.status === 'active')
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    .slice(0, 3);
   const recentApplications = applications.slice(0, 3);
 
   const getStatusBadge = (status) => {
@@ -43,6 +50,13 @@ const UserDashboard = () => {
       withdrawn: { class: 'bg-gray-100 text-gray-800', text: 'Withdrawn' }
     };
     return statusMap[status] || { class: 'bg-gray-100 text-gray-800', text: status };
+  };
+
+  const formatSalary = (min, max) => {
+    if (!min && !max) return 'Salary not specified';
+    if (min && max) return `${min.toLocaleString()} - ${max.toLocaleString()} RWF`;
+    if (min) return `From ${min.toLocaleString()} RWF`;
+    if (max) return `Up to ${max.toLocaleString()} RWF`;
   };
 
   return (
@@ -185,18 +199,28 @@ const UserDashboard = () => {
               ) : recentJobs.length > 0 ? (
                 <div className="space-y-4">
                   {recentJobs.map((job) => (
-                    <div key={job.id} className="p-4 bg-gray-50 rounded-lg">
-                      <h3 className="font-medium text-gray-900 mb-1">{job.title}</h3>
-                      <p className="text-sm text-gray-600 mb-2">{job.company} • {job.location}</p>
+                    <div key={job.id} className="p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex-1">
+                          <h3 className="font-medium text-gray-900 mb-1">{job.title}</h3>
+                          <p className="text-sm text-gray-600">{job.company} • {job.location}</p>
+                        </div>
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 ml-2">
+                          Active
+                        </span>
+                      </div>
                       <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-500">
-                          ${job.salary_min?.toLocaleString()} - ${job.salary_max?.toLocaleString()}
+                        <span className="text-sm text-green-600 font-medium">
+                          {formatSalary(job.salary_min, job.salary_max)}
                         </span>
                         <Link 
                           to={`/jobs/${job.id}`}
-                          className="text-primary-600 hover:text-primary-700 text-sm font-medium"
+                          className="text-primary-600 hover:text-primary-700 text-sm font-medium flex items-center"
                         >
-                          View Details →
+                          View Details
+                          <svg className="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+                          </svg>
                         </Link>
                       </div>
                     </div>
@@ -205,7 +229,10 @@ const UserDashboard = () => {
               ) : (
                 <div className="text-center py-8">
                   <span className="text-4xl mb-4 block">💼</span>
-                  <p className="text-gray-600">No recent jobs available</p>
+                  <p className="text-gray-600 mb-4">No recent jobs available</p>
+                  <Link to="/jobs" className="btn btn-primary btn-sm">
+                    Browse All Jobs
+                  </Link>
                 </div>
               )}
             </div>

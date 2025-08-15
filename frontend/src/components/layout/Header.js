@@ -2,18 +2,28 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logoutRequest } from '../../store/actions';
+import { useNotification } from '../../contexts/NotificationContext';
 
 const Header = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { isAuthenticated, user } = useSelector((state) => state.auth);
+  const { showSuccess, showError, showWarning, showInfo } = useNotification();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const handleLogout = () => {
     dispatch(logoutRequest());
+    showSuccess('Logged out successfully!');
     navigate('/');
     setIsDropdownOpen(false);
+  };
+
+  const testNotifications = () => {
+    showSuccess('This is a success notification!');
+    setTimeout(() => showError('This is an error notification!'), 1000);
+    setTimeout(() => showWarning('This is a warning notification!'), 2000);
+    setTimeout(() => showInfo('This is an info notification!'), 3000);
   };
 
   const toggleMenu = () => {
@@ -63,6 +73,15 @@ const Header = () => {
                 )}
               </>
             )}
+            
+            {/* Test Notifications Button (for development) */}
+            <button
+              onClick={testNotifications}
+              className="nav-link text-sm"
+              title="Test notifications"
+            >
+              Test Notifications
+            </button>
           </nav>
 
           {/* Auth Buttons / User Menu */}
