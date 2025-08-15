@@ -76,7 +76,14 @@ const Register = () => {
     
     if (validateForm()) {
       const { confirmPassword, ...registerData } = formData;
-      dispatch(registerRequest(registerData));
+      // Add role field as requested
+      const finalData = {
+        ...registerData,
+        role: 'user' // Default role for new registrations
+      };
+      
+      console.log('Submitting registration data:', finalData);
+      dispatch(registerRequest(finalData));
     }
   };
 
