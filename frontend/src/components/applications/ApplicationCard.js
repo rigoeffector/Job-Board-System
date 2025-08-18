@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { updateApplicationStatusRequest } from '../../store/actions';
+import { useNotification } from '../../contexts/NotificationContext';
 
-const ApplicationCard = ({ application }) => {
+const ApplicationCard = ({ application, isAdmin = false }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const dispatch = useDispatch();
+  const { showSuccess, showError } = useNotification();
 
   const getStatusBadge = (status) => {
     const statusMap = {
@@ -15,6 +20,15 @@ const ApplicationCard = ({ application }) => {
   };
 
   const statusBadge = getStatusBadge(application.status);
+
+  const handleStatusUpdate = async (newStatus) => {
+    try {
+      await dispatch(updateApplicationStatusRequest(application.id, newStatus));
+      showSuccess(`Application ${newStatus} successfully`);
+    } catch (error) {
+      showError('Failed to update application status');
+    }
+  };
 
   return (
     <div 
@@ -46,6 +60,9 @@ const ApplicationCard = ({ application }) => {
                 {application.job?.title || application.job_title || 'Unknown Job'}
               </h3>
               <p className="text-gray-600 text-sm truncate">{application.job?.company || application.company || 'Unknown Company'}</p>
+              {isAdmin && application.user?.name && (
+                <p className="text-gray-500 text-xs truncate">Applicant: {application.user.name}</p>
+              )}
             </div>
           </div>
           <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${statusBadge.class} transition-all duration-200 ${isHovered ? 'scale-110' : ''} flex-shrink-0`}>
@@ -90,10 +107,47 @@ const ApplicationCard = ({ application }) => {
             </svg>
           </Link>
           
-          {application.status === 'pending' && (
-            <button className="text-red-600 hover:text-red-700 font-medium text-sm transition-colors duration-200 hover:bg-red-50 px-3 py-1 rounded-lg">
-              Withdraw Application
-            </button>
+          {isAdmin ? (
+            <div className="flex items-center space-x-2">
+              {application.status === 'pending' && (
+                <>
+                  <button 
+                    onClick={() => handleStatusUpdate('accepted')}
+                    className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors"
+                  >
+                    Accept
+                  </button>
+                  <button 
+                    onClick={() => handleStatusUpdate('rejected')}
+                    className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
+                  >
+                    Reject
+                  </button>
+                </>
+              )}
+              {application.status === 'accepted' && (
+                <button 
+                  onClick={() => handleStatusUpdate('rejected')}
+                  className="px-2 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 transition-colors"
+                >
+                  Change to Rejected
+                </button>
+              )}
+              {application.status === 'rejected' && (
+                <button 
+                  onClick={() => handleStatusUpdate('accepted')}
+                  className="px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors"
+                >
+                  Change to Accepted
+                </button>
+              )}
+            </div>
+          ) : (
+            application.status === 'pending' && (
+              <button className="text-red-600 hover:text-red-700 font-medium text-sm transition-colors duration-200 hover:bg-red-50 px-3 py-1 rounded-lg">
+                Withdraw Application
+              </button>
+            )
           )}
         </div>
       </div>

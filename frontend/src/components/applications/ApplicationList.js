@@ -6,6 +6,8 @@ import ApplicationCard from './ApplicationCard';
 const ApplicationList = () => {
   const dispatch = useDispatch();
   const { applications, loading } = useSelector((state) => state.applications);
+  const { user } = useSelector((state) => state.auth);
+  const isAdmin = user?.role === 'admin';
   const [filters, setFilters] = useState({
     status: '',
     search: ''
@@ -39,10 +41,10 @@ const ApplicationList = () => {
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            My Applications
+            {isAdmin ? 'All Applications' : 'My Applications'}
           </h1>
           <p className="text-gray-600">
-            Track the status of your job applications
+            {isAdmin ? 'Manage and review all job applications' : 'Track the status of your job applications'}
           </p>
         </div>
 
@@ -148,7 +150,7 @@ const ApplicationList = () => {
         ) : filteredApplications.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredApplications.map((application) => (
-              <ApplicationCard key={application.id} application={application} />
+              <ApplicationCard key={application.id} application={application} isAdmin={isAdmin} />
             ))}
           </div>
         ) : (
