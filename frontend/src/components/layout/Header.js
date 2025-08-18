@@ -19,12 +19,7 @@ const Header = () => {
     setIsDropdownOpen(false);
   };
 
-  const testNotifications = () => {
-    showSuccess('This is a success notification!');
-    setTimeout(() => showError('This is an error notification!'), 1000);
-    setTimeout(() => showWarning('This is a warning notification!'), 2000);
-    setTimeout(() => showInfo('This is an info notification!'), 3000);
-  };
+
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -74,14 +69,7 @@ const Header = () => {
               </>
             )}
             
-            {/* Test Notifications Button (for development) */}
-            <button
-              onClick={testNotifications}
-              className="nav-link text-sm"
-              title="Test notifications"
-            >
-              Test Notifications
-            </button>
+
           </nav>
 
           {/* Auth Buttons / User Menu */}

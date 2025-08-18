@@ -32,7 +32,7 @@ router.get('/', optionalAuth, [
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { title, location, type, status, page = 1, limit = 10 } = req.query;
+    const { title, location, type, status, page = 1, limit = 12 } = req.query;
     const offset = (page - 1) * limit;
 
     // Build WHERE clause

@@ -202,11 +202,11 @@ const AdminDashboard = () => {
               ) : recentApplications.length > 0 ? (
                 <div className="space-y-4">
                   {recentApplications.map((application) => (
-                    <div key={application.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                      <div className="flex-1">
-                        <h3 className="font-medium text-gray-900">{application.job_title}</h3>
-                        <p className="text-sm text-gray-600">{application.applicant_name}</p>
-                      </div>
+                                          <div key={application.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                        <div className="flex-1">
+                          <h3 className="font-medium text-gray-900">{application.job?.title || application.job_title}</h3>
+                          <p className="text-sm text-gray-600">{application.user?.name || application.applicant_name}</p>
+                        </div>
                       <div className="flex items-center space-x-3">
                         <span className={`badge ${getApplicationStatusBadge(application.status).class}`}>
                           {getApplicationStatusBadge(application.status).text}

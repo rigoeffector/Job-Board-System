@@ -21,10 +21,12 @@ import UserDashboard from './components/dashboard/UserDashboard';
 import AdminDashboard from './components/dashboard/AdminDashboard';
 import Jobs from './components/jobs/JobList';
 import JobDetail from './components/jobs/JobDetail';
+import JobForm from './components/jobs/JobForm';
 import Applications from './components/applications/ApplicationList';
 import ApplicationForm from './components/applications/ApplicationForm';
 import ApplicationDetail from './components/applications/ApplicationDetail';
 import Profile from './components/auth/Profile';
+import AdminJobList from './components/admin/AdminJobList';
 
 function App() {
   const dispatch = useDispatch();
@@ -125,10 +127,23 @@ function App() {
               path="/admin/jobs" 
               element={
                 <AdminRoute>
-                  <div className="container mx-auto px-4 py-8">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-8">Manage Jobs</h1>
-                    <p className="text-gray-600">Admin job management interface coming soon...</p>
-                  </div>
+                  <AdminJobList />
+                </AdminRoute>
+              } 
+            />
+            <Route 
+              path="/admin/jobs/create" 
+              element={
+                <AdminRoute>
+                  <JobForm />
+                </AdminRoute>
+              } 
+            />
+            <Route 
+              path="/admin/jobs/:id/edit" 
+              element={
+                <AdminRoute>
+                  <JobForm />
                 </AdminRoute>
               } 
             />

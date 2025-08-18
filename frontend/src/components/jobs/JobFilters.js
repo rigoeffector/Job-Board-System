@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { setFilters, clearFilters, fetchJobsRequest } from '../../store/actions';
+import { setFilters, clearFilters } from '../../store/actions';
 import useDebounce from '../../hooks/useDebounce';
 
 const JobFilters = () => {
@@ -29,42 +29,12 @@ const JobFilters = () => {
   const handleFilterChange = (name, value) => {
     const newFilters = { ...filters, [name]: value };
     dispatch(setFilters(newFilters));
-    
-    // Send API request with updated filters
-    const apiParams = {
-      page: 1, // Reset to first page when filters change
-      limit: pagination.limit,
-      ...newFilters
-    };
-    
-    // Map frontend filter names to backend API parameters
-    if (apiParams.search) {
-      apiParams.title = apiParams.search;
-      delete apiParams.search;
-    }
-    
-    // Remove empty filter values
-    Object.keys(apiParams).forEach(key => {
-      if (apiParams[key] === '' || apiParams[key] === null || apiParams[key] === undefined) {
-        delete apiParams[key];
-      }
-    });
-    
-    dispatch(fetchJobsRequest(apiParams));
   };
 
   const handleClearFilters = () => {
     dispatch(clearFilters());
     setSearchValue('');
     setLocationValue('');
-    
-    // Send API request without filters
-    const apiParams = {
-      page: 1,
-      limit: pagination.limit
-    };
-    
-    dispatch(fetchJobsRequest(apiParams));
   };
 
   return (
