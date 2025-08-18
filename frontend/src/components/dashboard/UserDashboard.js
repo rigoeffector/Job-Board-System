@@ -1,16 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchJobsRequest, fetchApplicationsRequest } from '../../store/actions';
-import JobApplicationModal from '../jobs/JobApplicationModal';
 
 const UserDashboard = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { user } = useSelector((state) => state.auth);
   const { jobs, loading: jobsLoading } = useSelector((state) => state.jobs);
   const { applications, loading: appsLoading } = useSelector((state) => state.applications);
-  const [selectedJob, setSelectedJob] = useState(null);
-  const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
   const [stats, setStats] = useState({
     totalApplications: 0,
     pendingApplications: 0,
@@ -57,6 +55,10 @@ const UserDashboard = () => {
     if (min && max) return `${min.toLocaleString()} - ${max.toLocaleString()} RWF`;
     if (min) return `From ${min.toLocaleString()} RWF`;
     if (max) return `Up to ${max.toLocaleString()} RWF`;
+  };
+
+  const handleApplyClick = (job) => {
+    navigate(`/apply/${job.id}`);
   };
 
   return (
@@ -152,8 +154,8 @@ const UserDashboard = () => {
                   {recentApplications.map((application) => (
                     <div key={application.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                       <div>
-                        <h3 className="font-medium text-gray-900">{application.job_title}</h3>
-                        <p className="text-sm text-gray-600">{application.company}</p>
+                        <h3 className="font-medium text-gray-900">{application.job?.title || application.job_title || 'Unknown Job'}</h3>
+                        <p className="text-sm text-gray-600">{application.job?.company || application.company || 'Unknown Company'}</p>
                       </div>
                       <span className={`badge ${getStatusBadge(application.status).class}`}>
                         {getStatusBadge(application.status).text}
@@ -213,15 +215,43 @@ const UserDashboard = () => {
                         <span className="text-sm text-green-600 font-medium">
                           {formatSalary(job.salary_min, job.salary_max)}
                         </span>
-                        <Link 
-                          to={`/jobs/${job.id}`}
-                          className="text-primary-600 hover:text-primary-700 text-sm font-medium flex items-center"
-                        >
-                          View Details
-                          <svg className="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
-                          </svg>
-                        </Link>
+                        <div className="flex items-center space-x-3">
+                          {(() => {
+                            const hasApplied = applications.some(app => app.job?.id === job.id || app.job_id === job.id);
+                            return (
+                              <button
+                                onClick={() => handleApplyClick(job)}
+                                disabled={hasApplied}
+                                className={`text-sm font-medium flex items-center ${
+                                  hasApplied 
+                                    ? 'text-gray-400 cursor-not-allowed' 
+                                    : 'text-green-600 hover:text-green-700'
+                                }`}
+                              >
+                                {hasApplied ? 'Already Applied' : 'Apply Now'}
+                                {!hasApplied && (
+                                  <svg className="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                  </svg>
+                                )}
+                                {hasApplied && (
+                                  <svg className="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                  </svg>
+                                )}
+                              </button>
+                            );
+                          })()}
+                          <Link 
+                            to={`/jobs/${job.id}`}
+                            className="text-primary-600 hover:text-primary-700 text-sm font-medium flex items-center"
+                          >
+                            View Details
+                            <svg className="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+                            </svg>
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   ))}

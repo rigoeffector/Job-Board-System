@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchJobsRequest, setPage, clearFilters } from '../../store/actions';
+import { fetchJobsRequest, fetchApplicationsRequest, setPage, clearFilters } from '../../store/actions';
 import JobCard from './JobCard';
 import JobFilters from './JobFilters';
 import Pagination from '../common/Pagination';
@@ -8,6 +8,7 @@ import Pagination from '../common/Pagination';
 const JobList = () => {
   const dispatch = useDispatch();
   const { jobs, loading, pagination, filters } = useSelector((state) => state.jobs);
+  const { isAuthenticated } = useSelector((state) => state.auth);
 
   useEffect(() => {
     // Send filters and pagination to the backend API
@@ -32,6 +33,13 @@ const JobList = () => {
     
     dispatch(fetchJobsRequest(apiParams));
   }, [dispatch, pagination.page, pagination.limit, filters]);
+
+  // Fetch user's applications if authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      dispatch(fetchApplicationsRequest());
+    }
+  }, [dispatch, isAuthenticated]);
 
   const handlePageChange = (page) => {
     dispatch(setPage(page));

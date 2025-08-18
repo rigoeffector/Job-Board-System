@@ -1,17 +1,26 @@
 import React, { useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchJobRequest } from '../../store/actions';
+import { fetchJobRequest, fetchApplicationsRequest } from '../../store/actions';
 
 const JobDetail = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { currentJob, loading } = useSelector((state) => state.jobs);
   const { isAuthenticated } = useSelector((state) => state.auth);
+  const { applications } = useSelector((state) => state.applications);
 
   useEffect(() => {
     dispatch(fetchJobRequest(id));
   }, [dispatch, id]);
+
+  // Fetch user's applications if authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      dispatch(fetchApplicationsRequest());
+    }
+  }, [dispatch, isAuthenticated]);
 
   if (loading) {
     return (
@@ -43,9 +52,9 @@ const JobDetail = () => {
 
   const formatSalary = (min, max) => {
     if (!min && !max) return 'Salary not specified';
-    if (min && max) return `$${min.toLocaleString()} - $${max.toLocaleString()}`;
-    if (min) return `From $${min.toLocaleString()}`;
-    if (max) return `Up to $${max.toLocaleString()}`;
+    if (min && max) return `${min.toLocaleString()} - ${max.toLocaleString()} RWF`;
+    if (min) return `From ${min.toLocaleString()} RWF`;
+    if (max) return `Up to ${max.toLocaleString()} RWF`;
   };
 
   const getStatusBadge = (status) => {
@@ -69,6 +78,21 @@ const JobDetail = () => {
 
   const statusBadge = getStatusBadge(currentJob.status);
   const typeBadge = getTypeBadge(currentJob.type);
+
+  // Check if user has already applied to this job
+  const hasApplied = applications.some(app => app.job?.id === currentJob.id || app.job_id === currentJob.id);
+
+  const handleApplyClick = (e) => {
+    e.preventDefault();
+    if (isAuthenticated) {
+      // If logged in, navigate to application page
+      navigate(`/apply/${currentJob.id}`);
+    } else {
+      // If not logged in, save the job ID and redirect to login
+      localStorage.setItem('pendingApplication', currentJob.id);
+      navigate('/login');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -158,12 +182,17 @@ const JobDetail = () => {
               
               {currentJob.status === 'active' ? (
                 isAuthenticated ? (
-                  <Link 
-                    to={`/jobs/${currentJob.id}/apply`}
-                    className="btn btn-primary w-full mb-4"
+                  <button 
+                    onClick={handleApplyClick}
+                    disabled={hasApplied}
+                    className={`btn w-full mb-4 ${
+                      hasApplied 
+                        ? 'btn-secondary opacity-50 cursor-not-allowed' 
+                        : 'btn-primary'
+                    }`}
                   >
-                    Apply Now
-                  </Link>
+                    {hasApplied ? 'Already Applied' : 'Apply Now'}
+                  </button>
                 ) : (
                   <div className="space-y-4">
                     <p className="text-sm text-gray-600">

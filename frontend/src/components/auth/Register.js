@@ -27,8 +27,8 @@ const Register = () => {
       const pendingApplication = localStorage.getItem('pendingApplication');
       if (pendingApplication) {
         localStorage.removeItem('pendingApplication');
-        // Navigate to jobs page - the modal will be handled by the JobCard component
-        navigate('/jobs');
+        // Navigate to application page
+        navigate(`/apply/${pendingApplication}`);
       } else {
         navigate('/dashboard');
       }

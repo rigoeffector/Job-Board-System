@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import JobApplicationModal from './JobApplicationModal';
 
 const JobCard = ({ job }) => {
   const [isHovered, setIsHovered] = useState(false);
-  const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
   const navigate = useNavigate();
   const { isAuthenticated } = useSelector((state) => state.auth);
+  const { applications } = useSelector((state) => state.applications);
 
   const formatSalary = (min, max) => {
     if (!min && !max) return 'Salary not specified';
@@ -38,6 +37,9 @@ const JobCard = ({ job }) => {
   const statusBadge = getStatusBadge(job.status);
   const typeBadge = getTypeBadge(job.type);
 
+  // Check if user has already applied to this job
+  const hasApplied = applications.some(app => app.job?.id === job.id || app.job_id === job.id);
+
   const timeAgo = (date) => {
     const now = new Date();
     const jobDate = new Date(date);
@@ -52,8 +54,8 @@ const JobCard = ({ job }) => {
   const handleApplyClick = (e) => {
     e.preventDefault();
     if (isAuthenticated) {
-      // If logged in, open application modal
-      setIsApplicationModalOpen(true);
+      // If logged in, navigate to application page
+      navigate(`/apply/${job.id}`);
     } else {
       // If not logged in, save the job ID and redirect to login
       localStorage.setItem('pendingApplication', job.id);
@@ -154,25 +156,30 @@ const JobCard = ({ job }) => {
               {job.status === 'active' && (
                 <button 
                   onClick={handleApplyClick}
-                  className="btn btn-success btn-sm"
+                  disabled={hasApplied}
+                  className={`btn btn-sm ${
+                    hasApplied 
+                      ? 'btn-secondary opacity-50 cursor-not-allowed' 
+                      : 'btn-success'
+                  }`}
                 >
-                  <span>Apply Now</span>
-                  <svg className="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                  </svg>
+                  <span>{hasApplied ? 'Already Applied' : 'Apply Now'}</span>
+                  {!hasApplied && (
+                    <svg className="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                  )}
+                  {hasApplied && (
+                    <svg className="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                  )}
                 </button>
               )}
             </div>
           </div>
         </div>
       </div>
-      
-      {/* Application Modal */}
-      <JobApplicationModal
-        job={job}
-        isOpen={isApplicationModalOpen}
-        onClose={() => setIsApplicationModalOpen(false)}
-      />
     </>
   );
 };

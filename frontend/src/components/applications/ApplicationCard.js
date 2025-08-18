@@ -39,13 +39,13 @@ const ApplicationCard = ({ application }) => {
               application.status === 'withdrawn' ? 'bg-gray-500' :
               'bg-gradient-to-r from-yellow-400 to-yellow-600'
             }`}>
-              {application.job_title.charAt(0).toUpperCase()}
+              {(application.job?.title || application.job_title || 'J').charAt(0).toUpperCase()}
             </div>
             <div className="min-w-0 flex-1">
               <h3 className="text-base font-semibold text-gray-900 mb-1 hover:text-primary-600 transition-colors truncate">
-                {application.job_title}
+                {application.job?.title || application.job_title || 'Unknown Job'}
               </h3>
-              <p className="text-gray-600 text-sm truncate">{application.company}</p>
+              <p className="text-gray-600 text-sm truncate">{application.job?.company || application.company || 'Unknown Company'}</p>
             </div>
           </div>
           <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${statusBadge.class} transition-all duration-200 ${isHovered ? 'scale-110' : ''} flex-shrink-0`}>
@@ -65,7 +65,7 @@ const ApplicationCard = ({ application }) => {
             <svg className="w-4 h-4 mr-2 flex-shrink-0" fill="currentColor" viewBox="0 0 24 24">
               <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
             </svg>
-            <span className="truncate">{application.location}</span>
+            <span className="truncate">{application.job?.location || application.location || 'Location not specified'}</span>
           </div>
         </div>
 

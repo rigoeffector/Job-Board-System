@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { useDispatch, useSelector } from 'react-redux';
 import { getProfileRequest } from './store/actions';
 import { NotificationProvider } from './contexts/NotificationContext';
+import { ApplicationProvider } from './contexts/ApplicationContext';
 
 // Layout Components
 import Header from './components/layout/Header';
@@ -21,6 +22,8 @@ import AdminDashboard from './components/dashboard/AdminDashboard';
 import Jobs from './components/jobs/JobList';
 import JobDetail from './components/jobs/JobDetail';
 import Applications from './components/applications/ApplicationList';
+import ApplicationForm from './components/applications/ApplicationForm';
+import ApplicationDetail from './components/applications/ApplicationDetail';
 import Profile from './components/auth/Profile';
 
 function App() {
@@ -54,7 +57,8 @@ function App() {
   console.log('Rendering main app content');
   return (
     <NotificationProvider>
-      <Router>
+      <ApplicationProvider>
+        <Router>
         <div className="min-h-screen flex flex-col bg-gray-50">
         <Header />
         <main className="flex-1">
@@ -80,6 +84,22 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Applications />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/apply/:jobId" 
+              element={
+                <ProtectedRoute>
+                  <ApplicationForm />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/applications/:id" 
+              element={
+                <ProtectedRoute>
+                  <ApplicationDetail />
                 </ProtectedRoute>
               } 
             />
@@ -130,7 +150,8 @@ function App() {
         </main>
         <Footer />
       </div>
-      </Router>
+        </Router>
+      </ApplicationProvider>
     </NotificationProvider>
   );
 }

@@ -18,8 +18,8 @@ const ApplicationList = () => {
   const filteredApplications = applications.filter(app => {
     const matchesStatus = !filters.status || app.status === filters.status;
     const matchesSearch = !filters.search || 
-      app.job_title?.toLowerCase().includes(filters.search.toLowerCase()) ||
-      app.company?.toLowerCase().includes(filters.search.toLowerCase());
+      (app.job?.title || app.job_title || '').toLowerCase().includes(filters.search.toLowerCase()) ||
+      (app.job?.company || app.company || '').toLowerCase().includes(filters.search.toLowerCase());
     return matchesStatus && matchesSearch;
   });
 
