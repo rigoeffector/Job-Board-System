@@ -1,17 +1,23 @@
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 
-// Database file path
-const dbPath = process.env.NODE_ENV === 'test' 
-  ? path.join(__dirname, '..', 'data', 'test.db')
-  : path.join(__dirname, '..', 'data', 'jobboard.db');
+// Database configuration for different environments
+let dbPath;
+if (process.env.NODE_ENV === 'test') {
+  dbPath = path.join(__dirname, '..', 'data', 'test.db');
+} else if (process.env.VERCEL) {
+  // Use in-memory database for Vercel serverless functions
+  dbPath = ':memory:';
+} else {
+  dbPath = path.join(__dirname, '..', 'data', 'jobboard.db');
+}
 
 // Create database instance
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
     console.error('Error opening database:', err.message);
   } else {
-    console.log('Connected to SQLite database');
+    console.log(`Connected to SQLite database: ${dbPath}`);
   }
 });
 
@@ -72,11 +78,89 @@ async function initDatabase() {
           reject(err);
         } else {
           console.log('Database tables created successfully');
-          resolve();
+          
+          // Seed initial data if using in-memory database (Vercel)
+          if (process.env.VERCEL) {
+            seedInitialData().then(() => {
+              console.log('Initial data seeded for Vercel deployment');
+              resolve();
+            }).catch(reject);
+          } else {
+            resolve();
+          }
         }
       });
     });
   });
+}
+
+// Seed initial data for Vercel deployment
+async function seedInitialData() {
+  try {
+    const bcrypt = require('bcryptjs');
+    
+    // Check if admin user already exists
+    const existingAdmin = await getRow('SELECT id FROM users WHERE email = ?', ['admin@example.com']);
+    
+    if (!existingAdmin) {
+      // Create admin user
+      const hashedPassword = await bcrypt.hash('admin123', 12);
+      await runQuery(
+        'INSERT INTO users (email, password, name, role) VALUES (?, ?, ?, ?)',
+        ['admin@example.com', hashedPassword, 'Admin User', 'admin']
+      );
+      console.log('Admin user created: admin@example.com / admin123');
+    }
+
+    // Check if sample jobs exist
+    const existingJobs = await getAll('SELECT COUNT(*) as count FROM jobs');
+    if (existingJobs[0].count === 0) {
+      // Create sample jobs
+      const sampleJobs = [
+        {
+          title: 'Senior Software Engineer',
+          description: 'We are looking for a talented Senior Software Engineer to join our team...',
+          company: 'Tech Corp',
+          location: 'San Francisco, CA',
+          salary_min: 120000,
+          salary_max: 180000,
+          type: 'full-time',
+          status: 'active'
+        },
+        {
+          title: 'Frontend Developer',
+          description: 'Join our frontend team to build amazing user experiences...',
+          company: 'Web Solutions',
+          location: 'Remote',
+          salary_min: 80000,
+          salary_max: 120000,
+          type: 'full-time',
+          status: 'active'
+        },
+        {
+          title: 'UX Designer',
+          description: 'Help us create beautiful and intuitive user interfaces...',
+          company: 'Design Studio',
+          location: 'New York, NY',
+          salary_min: 70000,
+          salary_max: 110000,
+          type: 'full-time',
+          status: 'active'
+        }
+      ];
+
+      for (const job of sampleJobs) {
+        await runQuery(
+          `INSERT INTO jobs (title, description, company, location, salary_min, salary_max, type, status, posted_by) 
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [job.title, job.description, job.company, job.location, job.salary_min, job.salary_max, job.type, job.status, 1]
+        );
+      }
+      console.log('Sample jobs created');
+    }
+  } catch (error) {
+    console.error('Error seeding initial data:', error);
+  }
 }
 
 // Helper function to run queries with promises

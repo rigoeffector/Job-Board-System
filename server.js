@@ -81,8 +81,8 @@ async function startServer() {
     await initDatabase();
     console.log('Database initialized successfully');
     
-    // Only start the server if not in test environment
-    if (process.env.NODE_ENV !== 'test') {
+    // Only start the server if not in test environment and not on Vercel
+    if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
       app.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
         console.log(`Health check: http://localhost:${PORT}/api/health`);
@@ -90,12 +90,19 @@ async function startServer() {
     }
   } catch (error) {
     console.error('Failed to start server:', error);
-    process.exit(1);
+    if (!process.env.VERCEL) {
+      process.exit(1);
+    }
   }
 }
 
-// Only start server if this file is run directly
-if (require.main === module) {
+// Initialize database for Vercel serverless functions
+if (process.env.VERCEL) {
+  initDatabase().catch(console.error);
+}
+
+// Only start server if this file is run directly and not on Vercel
+if (require.main === module && !process.env.VERCEL) {
   startServer();
 }
 
